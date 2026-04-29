@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Plus, Trash2, ChevronLeft, ChevronRight, Filter } from "lucide-react"
+import { Plus, Trash2, ChevronLeft, ChevronRight, Filter, PackageX } from "lucide-react"
 
 interface ItemNota {
   id: number
@@ -39,6 +39,247 @@ interface ItemNota {
   quantidade: number
   valorUnitario: number
 }
+
+// ========== MOCK DATA: Array de transações realistas ==========
+interface Transaction {
+  id: number
+  data: string
+  mes: string
+  ano: string
+  fornecedor: string
+  itens: {
+    descricao: string
+    tipo: "medicacao" | "frete"
+    quantidade: number
+    valorUnitario: number
+  }[]
+  valorTotal: number
+  notaFiscal: string
+}
+
+const mockTransactions: Transaction[] = [
+  // ABRIL 2026
+  {
+    id: 1,
+    data: "28/04/2026",
+    mes: "04",
+    ano: "2026",
+    fornecedor: "Formédica",
+    itens: [
+      { descricao: "Tirzepatida 40mg", tipo: "medicacao", quantidade: 10, valorUnitario: 850 },
+      { descricao: "Gestrinona 85mg", tipo: "medicacao", quantidade: 5, valorUnitario: 320 },
+      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 150 },
+    ],
+    valorTotal: 10750,
+    notaFiscal: "NF-2026-041",
+  },
+  {
+    id: 2,
+    data: "25/04/2026",
+    mes: "04",
+    ano: "2026",
+    fornecedor: "BIOS",
+    itens: [
+      { descricao: "hcg 5.000 ui", tipo: "medicacao", quantidade: 20, valorUnitario: 180 },
+      { descricao: "Tirzepatida 40mg", tipo: "medicacao", quantidade: 8, valorUnitario: 850 },
+    ],
+    valorTotal: 10400,
+    notaFiscal: "NF-2026-042",
+  },
+  {
+    id: 3,
+    data: "20/04/2026",
+    mes: "04",
+    ano: "2026",
+    fornecedor: "Flukka",
+    itens: [
+      { descricao: "Gestrinona 85mg", tipo: "medicacao", quantidade: 15, valorUnitario: 320 },
+      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 250 },
+    ],
+    valorTotal: 5050,
+    notaFiscal: "NF-2026-043",
+  },
+  {
+    id: 4,
+    data: "15/04/2026",
+    mes: "04",
+    ano: "2026",
+    fornecedor: "Essentia",
+    itens: [
+      { descricao: "Tirzepatida 40mg", tipo: "medicacao", quantidade: 5, valorUnitario: 850 },
+    ],
+    valorTotal: 4250,
+    notaFiscal: "NF-2026-044",
+  },
+  {
+    id: 5,
+    data: "10/04/2026",
+    mes: "04",
+    ano: "2026",
+    fornecedor: "Formédica",
+    itens: [
+      { descricao: "hcg 5.000 ui", tipo: "medicacao", quantidade: 50, valorUnitario: 180 },
+      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 320 },
+    ],
+    valorTotal: 9320,
+    notaFiscal: "NF-2026-045",
+  },
+  // MARÇO 2026
+  {
+    id: 6,
+    data: "28/03/2026",
+    mes: "03",
+    ano: "2026",
+    fornecedor: "BIOS",
+    itens: [
+      { descricao: "Tirzepatida 40mg", tipo: "medicacao", quantidade: 12, valorUnitario: 850 },
+      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 180 },
+    ],
+    valorTotal: 10380,
+    notaFiscal: "NF-2026-031",
+  },
+  {
+    id: 7,
+    data: "22/03/2026",
+    mes: "03",
+    ano: "2026",
+    fornecedor: "Formédica",
+    itens: [
+      { descricao: "Gestrinona 85mg", tipo: "medicacao", quantidade: 20, valorUnitario: 320 },
+    ],
+    valorTotal: 6400,
+    notaFiscal: "NF-2026-032",
+  },
+  {
+    id: 8,
+    data: "15/03/2026",
+    mes: "03",
+    ano: "2026",
+    fornecedor: "Essentia",
+    itens: [
+      { descricao: "hcg 5.000 ui", tipo: "medicacao", quantidade: 30, valorUnitario: 180 },
+      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 250 },
+    ],
+    valorTotal: 5650,
+    notaFiscal: "NF-2026-033",
+  },
+  {
+    id: 9,
+    data: "08/03/2026",
+    mes: "03",
+    ano: "2026",
+    fornecedor: "Flukka",
+    itens: [
+      { descricao: "Tirzepatida 40mg", tipo: "medicacao", quantidade: 3, valorUnitario: 850 },
+    ],
+    valorTotal: 2550,
+    notaFiscal: "NF-2026-034",
+  },
+  // FEVEREIRO 2026
+  {
+    id: 10,
+    data: "26/02/2026",
+    mes: "02",
+    ano: "2026",
+    fornecedor: "Formédica",
+    itens: [
+      { descricao: "Tirzepatida 40mg", tipo: "medicacao", quantidade: 10, valorUnitario: 850 },
+      { descricao: "Gestrinona 85mg", tipo: "medicacao", quantidade: 8, valorUnitario: 320 },
+      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 280 },
+    ],
+    valorTotal: 11340,
+    notaFiscal: "NF-2026-021",
+  },
+  {
+    id: 11,
+    data: "20/02/2026",
+    mes: "02",
+    ano: "2026",
+    fornecedor: "BIOS",
+    itens: [
+      { descricao: "hcg 5.000 ui", tipo: "medicacao", quantidade: 40, valorUnitario: 180 },
+    ],
+    valorTotal: 7200,
+    notaFiscal: "NF-2026-022",
+  },
+  {
+    id: 12,
+    data: "14/02/2026",
+    mes: "02",
+    ano: "2026",
+    fornecedor: "Essentia",
+    itens: [
+      { descricao: "Gestrinona 85mg", tipo: "medicacao", quantidade: 6, valorUnitario: 320 },
+      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 150 },
+    ],
+    valorTotal: 2070,
+    notaFiscal: "NF-2026-023",
+  },
+  {
+    id: 13,
+    data: "05/02/2026",
+    mes: "02",
+    ano: "2026",
+    fornecedor: "Flukka",
+    itens: [
+      { descricao: "Tirzepatida 40mg", tipo: "medicacao", quantidade: 2, valorUnitario: 850 },
+    ],
+    valorTotal: 1700,
+    notaFiscal: "NF-2026-024",
+  },
+  // JANEIRO 2026
+  {
+    id: 14,
+    data: "30/01/2026",
+    mes: "01",
+    ano: "2026",
+    fornecedor: "BIOS",
+    itens: [
+      { descricao: "Tirzepatida 40mg", tipo: "medicacao", quantidade: 6, valorUnitario: 850 },
+      { descricao: "hcg 5.000 ui", tipo: "medicacao", quantidade: 25, valorUnitario: 180 },
+      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 200 },
+    ],
+    valorTotal: 9800,
+    notaFiscal: "NF-2026-011",
+  },
+  {
+    id: 15,
+    data: "22/01/2026",
+    mes: "01",
+    ano: "2026",
+    fornecedor: "Formédica",
+    itens: [
+      { descricao: "Gestrinona 85mg", tipo: "medicacao", quantidade: 12, valorUnitario: 320 },
+    ],
+    valorTotal: 3840,
+    notaFiscal: "NF-2026-012",
+  },
+  {
+    id: 16,
+    data: "15/01/2026",
+    mes: "01",
+    ano: "2026",
+    fornecedor: "Essentia",
+    itens: [
+      { descricao: "Tirzepatida 40mg", tipo: "medicacao", quantidade: 4, valorUnitario: 850 },
+      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 180 },
+    ],
+    valorTotal: 3580,
+    notaFiscal: "NF-2026-013",
+  },
+  {
+    id: 17,
+    data: "08/01/2026",
+    mes: "01",
+    ano: "2026",
+    fornecedor: "Flukka",
+    itens: [
+      { descricao: "hcg 5.000 ui", tipo: "medicacao", quantidade: 15, valorUnitario: 180 },
+    ],
+    valorTotal: 2700,
+    notaFiscal: "NF-2026-014",
+  },
+]
 
 const meses = [
   { value: "01", label: "Janeiro" },
@@ -57,42 +298,6 @@ const meses = [
 
 const anos = ["2025", "2026", "2027"]
 
-// Dados simulados por período
-const transacoesPorPeriodo: Record<string, {
-  id: number
-  data: string
-  fornecedor: string
-  itens: number
-  valorTotal: number
-  temFrete: boolean
-  notaFiscal: string
-}[]> = {
-  "04-2026": [
-    { id: 1, data: "28/04/2026", fornecedor: "Formédica", itens: 15, valorTotal: 25450.00, temFrete: true, notaFiscal: "NF-2026-041" },
-    { id: 2, data: "27/04/2026", fornecedor: "BIOS", itens: 12, valorTotal: 15450.00, temFrete: false, notaFiscal: "NF-2026-042" },
-    { id: 3, data: "26/04/2026", fornecedor: "Flukka", itens: 8, valorTotal: 8200.00, temFrete: true, notaFiscal: "NF-2026-043" },
-    { id: 4, data: "25/04/2026", fornecedor: "Essentia", itens: 5, valorTotal: 4350.00, temFrete: false, notaFiscal: "NF-2026-044" },
-    { id: 5, data: "24/04/2026", fornecedor: "Formédica", itens: 20, valorTotal: 32100.00, temFrete: true, notaFiscal: "NF-2026-045" },
-    { id: 6, data: "23/04/2026", fornecedor: "BIOS", itens: 6, valorTotal: 7800.00, temFrete: false, notaFiscal: "NF-2026-046" },
-  ],
-  "03-2026": [
-    { id: 1, data: "30/03/2026", fornecedor: "BIOS", itens: 10, valorTotal: 12300.00, temFrete: true, notaFiscal: "NF-2026-031" },
-    { id: 2, data: "28/03/2026", fornecedor: "Formédica", itens: 18, valorTotal: 22100.00, temFrete: false, notaFiscal: "NF-2026-032" },
-    { id: 3, data: "25/03/2026", fornecedor: "Essentia", itens: 6, valorTotal: 5800.00, temFrete: true, notaFiscal: "NF-2026-033" },
-    { id: 4, data: "20/03/2026", fornecedor: "Flukka", itens: 4, valorTotal: 3200.00, temFrete: false, notaFiscal: "NF-2026-034" },
-    { id: 5, data: "15/03/2026", fornecedor: "Formédica", itens: 12, valorTotal: 14500.00, temFrete: true, notaFiscal: "NF-2026-035" },
-  ],
-  "02-2026": [
-    { id: 1, data: "28/02/2026", fornecedor: "Formédica", itens: 15, valorTotal: 18500.00, temFrete: true, notaFiscal: "NF-2026-021" },
-    { id: 2, data: "25/02/2026", fornecedor: "BIOS", itens: 7, valorTotal: 7200.00, temFrete: false, notaFiscal: "NF-2026-022" },
-    { id: 3, data: "22/02/2026", fornecedor: "Flukka", itens: 9, valorTotal: 5800.00, temFrete: true, notaFiscal: "NF-2026-023" },
-    { id: 4, data: "18/02/2026", fornecedor: "Essentia", itens: 11, valorTotal: 9200.00, temFrete: false, notaFiscal: "NF-2026-024" },
-    { id: 5, data: "12/02/2026", fornecedor: "BIOS", itens: 8, valorTotal: 6500.00, temFrete: true, notaFiscal: "NF-2026-025" },
-    { id: 6, data: "08/02/2026", fornecedor: "Formédica", itens: 14, valorTotal: 16800.00, temFrete: false, notaFiscal: "NF-2026-026" },
-    { id: 7, data: "03/02/2026", fornecedor: "Flukka", itens: 5, valorTotal: 4100.00, temFrete: true, notaFiscal: "NF-2026-027" },
-  ],
-}
-
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -105,30 +310,33 @@ export function TransactionsView() {
   const [currentPage, setCurrentPage] = useState(1)
   const [dataCompra, setDataCompra] = useState("")
   const [fornecedor, setFornecedor] = useState("")
+  
+  // Estados para seleção temporária
   const [mesSelecionado, setMesSelecionado] = useState("04")
   const [anoSelecionado, setAnoSelecionado] = useState("2026")
+  
+  // Estado para o filtro aplicado (só atualiza ao clicar no botão)
+  const [appliedFilter, setAppliedFilter] = useState({ mes: "04", ano: "2026" })
+  
   const [itens, setItens] = useState<ItemNota[]>([
     { id: 1, descricao: "", tipo: "", quantidade: 1, valorUnitario: 0 }
   ])
 
-  const periodoAtual = `${mesSelecionado}-${anoSelecionado}`
-  const mesNome = meses.find(m => m.value === mesSelecionado)?.label || "Abril"
+  const mesNome = meses.find(m => m.value === appliedFilter.mes)?.label || "Abril"
 
-  const transacoesFiltradas = useMemo(() => {
-    return transacoesPorPeriodo[periodoAtual] || transacoesPorPeriodo["04-2026"]
-  }, [periodoAtual])
+  // Filtra transações com base no filtro aplicado
+  const filteredTransactions = useMemo(() => {
+    return mockTransactions.filter(
+      t => t.mes === appliedFilter.mes && t.ano === appliedFilter.ano
+    )
+  }, [appliedFilter])
 
   const itemsPerPage = 5
-  const totalPages = Math.ceil(transacoesFiltradas.length / itemsPerPage)
-  const paginatedTransactions = transacoesFiltradas.slice(
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage)
+  const paginatedTransactions = filteredTransactions.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   )
-
-  // Reset page when filter changes
-  useMemo(() => {
-    setCurrentPage(1)
-  }, [periodoAtual])
 
   const addItem = () => {
     setItens([
@@ -161,8 +369,13 @@ export function TransactionsView() {
   }
 
   const handleFiltrar = () => {
-    // O filtro já é reativo via useMemo
+    setAppliedFilter({ mes: mesSelecionado, ano: anoSelecionado })
     setCurrentPage(1)
+  }
+
+  // Verifica se a transação tem frete
+  const temFrete = (transaction: Transaction) => {
+    return transaction.itens.some(item => item.tipo === "frete")
   }
 
   return (
@@ -204,9 +417,8 @@ export function TransactionsView() {
           </div>
           
           <Button 
-            variant="outline" 
             onClick={handleFiltrar}
-            className="border-slate-200 text-slate-600 hover:bg-slate-50"
+            className="bg-teal-600 text-white hover:bg-teal-700"
           >
             <Filter className="mr-2 size-4" />
             Filtrar
@@ -214,7 +426,7 @@ export function TransactionsView() {
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-teal-600 text-white hover:bg-teal-700">
+              <Button variant="outline" className="border-slate-200 text-slate-600 hover:bg-slate-50">
                 <Plus className="mr-2 size-4" />
                 Novo Lançamento
               </Button>
@@ -371,7 +583,7 @@ export function TransactionsView() {
             Histórico de Lançamentos
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Exibindo registros de {mesNome}/{anoSelecionado}
+            Exibindo registros de {mesNome}/{appliedFilter.ano}
           </p>
         </CardHeader>
         <CardContent>
@@ -402,9 +614,9 @@ export function TransactionsView() {
                         {transaction.fornecedor}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-slate-600">{transaction.itens}</TableCell>
+                    <TableCell className="text-slate-600">{transaction.itens.length}</TableCell>
                     <TableCell>
-                      {transaction.temFrete ? (
+                      {temFrete(transaction) ? (
                         <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">
                           Com Frete
                         </Badge>
@@ -421,8 +633,12 @@ export function TransactionsView() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-slate-500">
-                    Nenhum lançamento encontrado para {mesNome}/{anoSelecionado}
+                  <TableCell colSpan={6} className="h-32 text-center">
+                    <div className="flex flex-col items-center justify-center text-slate-400">
+                      <PackageX className="mb-3 size-12" />
+                      <p className="text-sm font-medium">Nenhum lançamento encontrado para este período</p>
+                      <p className="text-xs">Tente selecionar outro mês ou ano</p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
@@ -430,12 +646,12 @@ export function TransactionsView() {
           </Table>
 
           {/* Paginação */}
-          {transacoesFiltradas.length > 0 && (
+          {filteredTransactions.length > 0 && (
             <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
               <p className="text-sm text-slate-500">
                 Mostrando {((currentPage - 1) * itemsPerPage) + 1} a{" "}
-                {Math.min(currentPage * itemsPerPage, transacoesFiltradas.length)} de{" "}
-                {transacoesFiltradas.length} registros
+                {Math.min(currentPage * itemsPerPage, filteredTransactions.length)} de{" "}
+                {filteredTransactions.length} registros
               </p>
               <div className="flex gap-2">
                 <Button
