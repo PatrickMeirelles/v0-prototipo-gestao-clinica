@@ -379,7 +379,7 @@ export function TransactionsView() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       {/* Barra de Filtros */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
@@ -388,9 +388,9 @@ export function TransactionsView() {
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="flex gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:flex">
             <Select value={mesSelecionado} onValueChange={setMesSelecionado}>
-              <SelectTrigger className="w-[130px] border-slate-200 bg-white text-slate-700">
+              <SelectTrigger className="w-full border-slate-200 bg-white text-slate-700 sm:w-36">
                 <SelectValue placeholder="Mês" />
               </SelectTrigger>
               <SelectContent>
@@ -403,7 +403,7 @@ export function TransactionsView() {
             </Select>
 
             <Select value={anoSelecionado} onValueChange={setAnoSelecionado}>
-              <SelectTrigger className="w-[100px] border-slate-200 bg-white text-slate-700">
+              <SelectTrigger className="w-full border-slate-200 bg-white text-slate-700 sm:w-28">
                 <SelectValue placeholder="Ano" />
               </SelectTrigger>
               <SelectContent>
@@ -418,7 +418,7 @@ export function TransactionsView() {
           
           <Button 
             onClick={handleFiltrar}
-            className="bg-teal-600 text-white hover:bg-teal-700"
+            className="w-full bg-teal-600 text-white hover:bg-teal-700 sm:w-auto"
           >
             <Filter className="mr-2 size-4" />
             Filtrar
@@ -426,7 +426,7 @@ export function TransactionsView() {
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="border-slate-200 text-slate-600 hover:bg-slate-50">
+              <Button variant="outline" className="w-full border-slate-200 text-slate-600 hover:bg-slate-50 sm:w-auto">
                 <Plus className="mr-2 size-4" />
                 Novo Lançamento
               </Button>
@@ -587,7 +587,8 @@ export function TransactionsView() {
           </p>
         </CardHeader>
         <CardContent>
-          <Table>
+          <div className="w-full overflow-x-auto">
+          <Table className="min-w-[860px]">
             <TableHeader>
               <TableRow className="border-slate-200 hover:bg-transparent">
                 <TableHead className="text-slate-600">Data</TableHead>
@@ -644,10 +645,11 @@ export function TransactionsView() {
               )}
             </TableBody>
           </Table>
+          </div>
 
           {/* Paginação */}
           {filteredTransactions.length > 0 && (
-            <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
+            <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-slate-500">
                 Mostrando {((currentPage - 1) * itemsPerPage) + 1} a{" "}
                 {Math.min(currentPage * itemsPerPage, filteredTransactions.length)} de{" "}

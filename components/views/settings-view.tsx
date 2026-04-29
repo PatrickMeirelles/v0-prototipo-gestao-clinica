@@ -33,8 +33,8 @@ export function SettingsView() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="perfil" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-slate-100 lg:w-auto lg:grid-cols-none lg:inline-flex">
+      <Tabs defaultValue="perfil" className="w-full min-w-0">
+        <TabsList className="grid h-auto w-full grid-cols-1 gap-2 bg-slate-100 p-2 sm:grid-cols-3 sm:gap-0 sm:p-1 lg:w-auto lg:grid-cols-none lg:inline-flex">
           <TabsTrigger value="perfil" className="gap-2 data-[state=active]:bg-white">
             <User className="hidden size-4 sm:block" />
             Perfil

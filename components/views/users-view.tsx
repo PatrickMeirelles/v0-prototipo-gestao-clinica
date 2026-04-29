@@ -62,7 +62,7 @@ export function UsersView() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       {/* Header */}
       <div>
         <h2 className="text-xl font-semibold text-slate-900">Controle de Usuários</h2>
@@ -82,7 +82,8 @@ export function UsersView() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
+          <div className="w-full overflow-x-auto">
+          <Table className="min-w-[760px]">
             <TableHeader>
               <TableRow className="border-slate-200 hover:bg-transparent">
                 <TableHead className="text-slate-600">Usuário</TableHead>
@@ -139,6 +140,7 @@ export function UsersView() {
               ))}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
 

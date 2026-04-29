@@ -3,7 +3,6 @@
 import type { ViewType } from "@/app/page"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { 
   LayoutDashboard, 
   Receipt, 
@@ -47,7 +46,7 @@ export function AppLayout({ children, currentView, onNavigate, onLogout }: AppLa
   }
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50">
       {/* Sidebar Desktop */}
       <aside className="hidden w-64 flex-col border-r border-slate-200 bg-white lg:flex">
         <div className="flex h-16 items-center gap-2 border-b border-slate-200 px-6">
@@ -154,7 +153,7 @@ export function AppLayout({ children, currentView, onNavigate, onLogout }: AppLa
       </aside>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col">
         {/* Header */}
         <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 lg:px-8">
           <div className="flex items-center gap-4">
@@ -183,11 +182,9 @@ export function AppLayout({ children, currentView, onNavigate, onLogout }: AppLa
         </header>
 
         {/* Page Content */}
-        <ScrollArea className="flex-1">
-          <main className="p-4 lg:p-8">
-            {children}
-          </main>
-        </ScrollArea>
+        <main className="min-w-0 flex-1 overflow-y-auto p-4 lg:p-8">
+          {children}
+        </main>
       </div>
     </div>
   )
