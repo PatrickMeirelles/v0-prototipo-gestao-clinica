@@ -1,49 +1,77 @@
-"use client"
+"use client";
 
-import type { ViewType } from "@/app/page"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { 
-  LayoutDashboard, 
-  Receipt, 
-  Users, 
-  Settings, 
+import type { ViewType } from "@/app/page";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  LayoutDashboard,
+  Receipt,
+  PackageSearch,
+  Users,
+  Settings,
   LogOut,
   Stethoscope,
   Menu,
-  X
-} from "lucide-react"
-import { useState } from "react"
+  X,
+} from "lucide-react";
+import { useState } from "react";
 
 interface AppLayoutProps {
-  children: React.ReactNode
-  currentView: ViewType
-  onNavigate: (view: ViewType) => void
-  onLogout: () => void
+  children: React.ReactNode;
+  currentView: ViewType;
+  onNavigate: (view: ViewType) => void;
+  onLogout: () => void;
 }
 
 const menuItems: { view: ViewType; label: string; icon: React.ReactNode }[] = [
-  { view: "dashboard", label: "Dashboard", icon: <LayoutDashboard className="size-4" /> },
-  { view: "transactions", label: "Lançamentos", icon: <Receipt className="size-4" /> },
-  { view: "users", label: "Usuários/Acessos", icon: <Users className="size-4" /> },
-  { view: "settings", label: "Configurações", icon: <Settings className="size-4" /> },
-]
+  {
+    view: "dashboard",
+    label: "Dashboard",
+    icon: <LayoutDashboard className="size-4" />,
+  },
+  {
+    view: "transactions",
+    label: "Lançamentos",
+    icon: <Receipt className="size-4" />,
+  },
+  {
+    view: "catalog",
+    label: "Cadastros",
+    icon: <PackageSearch className="size-4" />,
+  },
+  {
+    view: "users",
+    label: "Usuários/Acessos",
+    icon: <Users className="size-4" />,
+  },
+  {
+    view: "settings",
+    label: "Configurações",
+    icon: <Settings className="size-4" />,
+  },
+];
 
 const viewTitles: Record<ViewType, string> = {
   login: "Login",
   dashboard: "Dashboard",
   transactions: "Lançamentos",
+  catalog: "Cadastros",
   users: "Usuários e Acessos",
   settings: "Configurações",
-}
+};
 
-export function AppLayout({ children, currentView, onNavigate, onLogout }: AppLayoutProps) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+export function AppLayout({
+  children,
+  currentView,
+  onNavigate,
+  onLogout,
+}: AppLayoutProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleNavigate = (view: ViewType) => {
-    onNavigate(view)
-    setIsMobileMenuOpen(false)
-  }
+    onNavigate(view);
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -55,7 +83,7 @@ export function AppLayout({ children, currentView, onNavigate, onLogout }: AppLa
           </div>
           <span className="font-semibold text-slate-900">Gestão Clínica</span>
         </div>
-        
+
         <nav className="flex-1 p-4">
           <ul className="space-y-1">
             {menuItems.map((item) => (
@@ -63,8 +91,8 @@ export function AppLayout({ children, currentView, onNavigate, onLogout }: AppLa
                 <Button
                   variant={currentView === item.view ? "secondary" : "ghost"}
                   className={`w-full justify-start gap-3 ${
-                    currentView === item.view 
-                      ? "bg-teal-50 text-teal-700 hover:bg-teal-100" 
+                    currentView === item.view
+                      ? "bg-teal-50 text-teal-700 hover:bg-teal-100"
                       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`}
                   onClick={() => handleNavigate(item.view)}
@@ -91,14 +119,14 @@ export function AppLayout({ children, currentView, onNavigate, onLogout }: AppLa
 
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden" 
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Mobile Sidebar */}
-      <aside 
+      <aside
         className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white transition-transform duration-200 ease-in-out lg:hidden ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
@@ -110,15 +138,15 @@ export function AppLayout({ children, currentView, onNavigate, onLogout }: AppLa
             </div>
             <span className="font-semibold text-slate-900">Gestão Clínica</span>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             <X className="size-5" />
           </Button>
         </div>
-        
+
         <nav className="flex-1 p-4">
           <ul className="space-y-1">
             {menuItems.map((item) => (
@@ -126,8 +154,8 @@ export function AppLayout({ children, currentView, onNavigate, onLogout }: AppLa
                 <Button
                   variant={currentView === item.view ? "secondary" : "ghost"}
                   className={`w-full justify-start gap-3 ${
-                    currentView === item.view 
-                      ? "bg-teal-50 text-teal-700 hover:bg-teal-100" 
+                    currentView === item.view
+                      ? "bg-teal-50 text-teal-700 hover:bg-teal-100"
                       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`}
                   onClick={() => handleNavigate(item.view)}
@@ -169,14 +197,16 @@ export function AppLayout({ children, currentView, onNavigate, onLogout }: AppLa
               {viewTitles[currentView]}
             </h1>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
               <p className="text-sm font-medium text-slate-900">Sara Raquel</p>
               <p className="text-xs text-slate-500">Admin</p>
             </div>
             <Avatar className="size-9">
-              <AvatarFallback className="bg-teal-100 text-teal-700">SR</AvatarFallback>
+              <AvatarFallback className="bg-teal-100 text-teal-700">
+                SR
+              </AvatarFallback>
             </Avatar>
           </div>
         </header>
@@ -187,5 +217,5 @@ export function AppLayout({ children, currentView, onNavigate, onLogout }: AppLa
         </main>
       </div>
     </div>
-  )
+  );
 }
