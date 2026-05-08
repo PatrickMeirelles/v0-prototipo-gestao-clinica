@@ -151,7 +151,7 @@ export default function Home() {
       return (
         hasPermission("*") ||
         hasPermission(view) ||
-        hasPermission(`${view}:view`) ||
+        hasPermission(`${view}:read`) ||
         hasPermission(`${view}:*`)
       );
     },

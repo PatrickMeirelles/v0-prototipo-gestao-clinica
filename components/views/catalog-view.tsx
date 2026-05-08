@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -29,6 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Pencil, Save, Trash2, X } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 interface CatalogViewProps {
   suppliers: Supplier[];
@@ -63,6 +63,11 @@ export function CatalogView({
   onUpdateCatalogItem,
   onDeleteCatalogItem,
 }: CatalogViewProps) {
+  // Importamos o hook para verificar a permissão
+  const { hasPermission } = useAuth();
+  // Verificamos se o usuário tem permissão de escrita neste módulo
+  const canWrite = hasPermission("catalog:write");
+
   const [novoFornecedor, setNovoFornecedor] = useState("");
   const [novoItem, setNovoItem] = useState("");
   const [novaCategoria, setNovaCategoria] = useState<ItemCategory>("medicacao");
@@ -110,20 +115,23 @@ export function CatalogView({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Input
-                placeholder="Nome do fornecedor"
-                value={novoFornecedor}
-                onChange={(e) => setNovoFornecedor(e.target.value)}
-                className="border-slate-200"
-              />
-              <Button
-                onClick={handleAddSupplier}
-                className="w-full bg-teal-600 text-white hover:bg-teal-700 sm:w-auto"
-              >
-                Cadastrar
-              </Button>
-            </div>
+            {/* Esconde a área de criação se não tiver permissão */}
+            {canWrite && (
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Input
+                  placeholder="Nome do fornecedor"
+                  value={novoFornecedor}
+                  onChange={(e) => setNovoFornecedor(e.target.value)}
+                  className="border-slate-200"
+                />
+                <Button
+                  onClick={handleAddSupplier}
+                  className="w-full bg-teal-600 text-white hover:bg-teal-700 sm:w-auto"
+                >
+                  Cadastrar
+                </Button>
+              </div>
+            )}
 
             <div className="space-y-3 sm:hidden">
               {suppliers.map((supplier) => (
@@ -140,60 +148,64 @@ export function CatalogView({
                         {supplier.nome}
                       </p>
                     )}
-                    <div className="grid grid-cols-2 gap-2">
-                      {editingSupplierId === supplier.id ? (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              onUpdateSupplier(
-                                supplier.id,
-                                editingSupplierName,
-                              );
-                              setEditingSupplierId(null);
-                            }}
-                            className="border-slate-200"
-                          >
-                            <Save className="mr-1 size-4" />
-                            Salvar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingSupplierId(null)}
-                            className="border-slate-200"
-                          >
-                            <X className="mr-1 size-4" />
-                            Cancelar
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setEditingSupplierId(supplier.id);
-                              setEditingSupplierName(supplier.nome);
-                            }}
-                            className="border-slate-200"
-                          >
-                            <Pencil className="mr-1 size-4" />
-                            Editar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => onDeleteSupplier(supplier.id)}
-                            className="border-rose-200 text-rose-600 hover:bg-rose-50"
-                          >
-                            <Trash2 className="mr-1 size-4" />
-                            Excluir
-                          </Button>
-                        </>
-                      )}
-                    </div>
+
+                    {/* Esconde os botões de ação na versão mobile se não tiver permissão */}
+                    {canWrite && (
+                      <div className="grid grid-cols-2 gap-2">
+                        {editingSupplierId === supplier.id ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                onUpdateSupplier(
+                                  supplier.id,
+                                  editingSupplierName,
+                                );
+                                setEditingSupplierId(null);
+                              }}
+                              className="border-slate-200"
+                            >
+                              <Save className="mr-1 size-4" />
+                              Salvar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setEditingSupplierId(null)}
+                              className="border-slate-200"
+                            >
+                              <X className="mr-1 size-4" />
+                              Cancelar
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingSupplierId(supplier.id);
+                                setEditingSupplierName(supplier.nome);
+                              }}
+                              className="border-slate-200"
+                            >
+                              <Pencil className="mr-1 size-4" />
+                              Editar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => onDeleteSupplier(supplier.id)}
+                              className="border-rose-200 text-rose-600 hover:bg-rose-50"
+                            >
+                              <Trash2 className="mr-1 size-4" />
+                              Excluir
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -204,7 +216,10 @@ export function CatalogView({
                 <TableHeader>
                   <TableRow className="border-slate-200 hover:bg-transparent">
                     <TableHead>Fornecedor</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                    {/* Esconde a coluna de ações se não tiver permissão */}
+                    {canWrite && (
+                      <TableHead className="text-right">Ações</TableHead>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -225,62 +240,66 @@ export function CatalogView({
                           </span>
                         )}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex justify-end gap-2">
-                          {editingSupplierId === supplier.id ? (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  onUpdateSupplier(
-                                    supplier.id,
-                                    editingSupplierName,
-                                  );
-                                  setEditingSupplierId(null);
-                                }}
-                                className="border-slate-200"
-                              >
-                                <Save className="mr-1 size-4" />
-                                Salvar
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setEditingSupplierId(null)}
-                                className="border-slate-200"
-                              >
-                                <X className="mr-1 size-4" />
-                                Cancelar
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setEditingSupplierId(supplier.id);
-                                  setEditingSupplierName(supplier.nome);
-                                }}
-                                className="border-slate-200"
-                              >
-                                <Pencil className="mr-1 size-4" />
-                                Editar
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => onDeleteSupplier(supplier.id)}
-                                className="border-rose-200 text-rose-600 hover:bg-rose-50"
-                              >
-                                <Trash2 className="mr-1 size-4" />
-                                Excluir
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
+
+                      {/* Esconde as células de ação se não tiver permissão */}
+                      {canWrite && (
+                        <TableCell>
+                          <div className="flex justify-end gap-2">
+                            {editingSupplierId === supplier.id ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    onUpdateSupplier(
+                                      supplier.id,
+                                      editingSupplierName,
+                                    );
+                                    setEditingSupplierId(null);
+                                  }}
+                                  className="border-slate-200"
+                                >
+                                  <Save className="mr-1 size-4" />
+                                  Salvar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setEditingSupplierId(null)}
+                                  className="border-slate-200"
+                                >
+                                  <X className="mr-1 size-4" />
+                                  Cancelar
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setEditingSupplierId(supplier.id);
+                                    setEditingSupplierName(supplier.nome);
+                                  }}
+                                  className="border-slate-200"
+                                >
+                                  <Pencil className="mr-1 size-4" />
+                                  Editar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => onDeleteSupplier(supplier.id)}
+                                  className="border-rose-200 text-rose-600 hover:bg-rose-50"
+                                >
+                                  <Trash2 className="mr-1 size-4" />
+                                  Excluir
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -299,33 +318,38 @@ export function CatalogView({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-2 sm:grid-cols-[1fr_170px_auto]">
-              <Input
-                placeholder="Nome do item/insumo"
-                value={novoItem}
-                onChange={(e) => setNovoItem(e.target.value)}
-                className="border-slate-200"
-              />
-              <Select
-                value={novaCategoria}
-                onValueChange={(value: ItemCategory) => setNovaCategoria(value)}
-              >
-                <SelectTrigger className="w-full border-slate-200">
-                  <SelectValue placeholder="Categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="medicacao">Medicação</SelectItem>
-                  <SelectItem value="insumo">Insumo</SelectItem>
-                  <SelectItem value="taxa_frete">Taxa/Frete</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                onClick={handleAddItem}
-                className="w-full bg-teal-600 text-white hover:bg-teal-700 sm:w-auto"
-              >
-                Cadastrar
-              </Button>
-            </div>
+            {/* Esconde a área de criação se não tiver permissão */}
+            {canWrite && (
+              <div className="grid gap-2 sm:grid-cols-[1fr_170px_auto]">
+                <Input
+                  placeholder="Nome do item/insumo"
+                  value={novoItem}
+                  onChange={(e) => setNovoItem(e.target.value)}
+                  className="border-slate-200"
+                />
+                <Select
+                  value={novaCategoria}
+                  onValueChange={(value: ItemCategory) =>
+                    setNovaCategoria(value)
+                  }
+                >
+                  <SelectTrigger className="w-full border-slate-200">
+                    <SelectValue placeholder="Categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="medicacao">Medicação</SelectItem>
+                    <SelectItem value="insumo">Insumo</SelectItem>
+                    <SelectItem value="taxa_frete">Taxa/Frete</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={handleAddItem}
+                  className="w-full bg-teal-600 text-white hover:bg-teal-700 sm:w-auto"
+                >
+                  Cadastrar
+                </Button>
+              </div>
+            )}
 
             <div className="space-y-3 sm:hidden">
               {catalogItems.map((item) => (
@@ -369,61 +393,65 @@ export function CatalogView({
                         </Badge>
                       </>
                     )}
-                    <div className="grid grid-cols-2 gap-2">
-                      {editingItemId === item.id ? (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              onUpdateCatalogItem(item.id, {
-                                nome: editingItemName,
-                                categoria: editingItemCategory,
-                              });
-                              setEditingItemId(null);
-                            }}
-                            className="border-slate-200"
-                          >
-                            <Save className="mr-1 size-4" />
-                            Salvar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setEditingItemId(null)}
-                            className="border-slate-200"
-                          >
-                            <X className="mr-1 size-4" />
-                            Cancelar
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setEditingItemId(item.id);
-                              setEditingItemName(item.nome);
-                              setEditingItemCategory(item.categoria);
-                            }}
-                            className="border-slate-200"
-                          >
-                            <Pencil className="mr-1 size-4" />
-                            Editar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => onDeleteCatalogItem(item.id)}
-                            className="border-rose-200 text-rose-600 hover:bg-rose-50"
-                          >
-                            <Trash2 className="mr-1 size-4" />
-                            Excluir
-                          </Button>
-                        </>
-                      )}
-                    </div>
+
+                    {/* Esconde os botões de ação na versão mobile se não tiver permissão */}
+                    {canWrite && (
+                      <div className="grid grid-cols-2 gap-2">
+                        {editingItemId === item.id ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                onUpdateCatalogItem(item.id, {
+                                  nome: editingItemName,
+                                  categoria: editingItemCategory,
+                                });
+                                setEditingItemId(null);
+                              }}
+                              className="border-slate-200"
+                            >
+                              <Save className="mr-1 size-4" />
+                              Salvar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setEditingItemId(null)}
+                              className="border-slate-200"
+                            >
+                              <X className="mr-1 size-4" />
+                              Cancelar
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingItemId(item.id);
+                                setEditingItemName(item.nome);
+                                setEditingItemCategory(item.categoria);
+                              }}
+                              className="border-slate-200"
+                            >
+                              <Pencil className="mr-1 size-4" />
+                              Editar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => onDeleteCatalogItem(item.id)}
+                              className="border-rose-200 text-rose-600 hover:bg-rose-50"
+                            >
+                              <Trash2 className="mr-1 size-4" />
+                              Excluir
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -435,7 +463,10 @@ export function CatalogView({
                   <TableRow className="border-slate-200 hover:bg-transparent">
                     <TableHead>Item</TableHead>
                     <TableHead>Categoria</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                    {/* Esconde a coluna de ações se não tiver permissão */}
+                    {canWrite && (
+                      <TableHead className="text-right">Ações</TableHead>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -484,63 +515,67 @@ export function CatalogView({
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex justify-end gap-2">
-                          {editingItemId === item.id ? (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  onUpdateCatalogItem(item.id, {
-                                    nome: editingItemName,
-                                    categoria: editingItemCategory,
-                                  });
-                                  setEditingItemId(null);
-                                }}
-                                className="border-slate-200"
-                              >
-                                <Save className="mr-1 size-4" />
-                                Salvar
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setEditingItemId(null)}
-                                className="border-slate-200"
-                              >
-                                <X className="mr-1 size-4" />
-                                Cancelar
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setEditingItemId(item.id);
-                                  setEditingItemName(item.nome);
-                                  setEditingItemCategory(item.categoria);
-                                }}
-                                className="border-slate-200"
-                              >
-                                <Pencil className="mr-1 size-4" />
-                                Editar
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => onDeleteCatalogItem(item.id)}
-                                className="border-rose-200 text-rose-600 hover:bg-rose-50"
-                              >
-                                <Trash2 className="mr-1 size-4" />
-                                Excluir
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
+
+                      {/* Esconde as células de ação se não tiver permissão */}
+                      {canWrite && (
+                        <TableCell>
+                          <div className="flex justify-end gap-2">
+                            {editingItemId === item.id ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    onUpdateCatalogItem(item.id, {
+                                      nome: editingItemName,
+                                      categoria: editingItemCategory,
+                                    });
+                                    setEditingItemId(null);
+                                  }}
+                                  className="border-slate-200"
+                                >
+                                  <Save className="mr-1 size-4" />
+                                  Salvar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setEditingItemId(null)}
+                                  className="border-slate-200"
+                                >
+                                  <X className="mr-1 size-4" />
+                                  Cancelar
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setEditingItemId(item.id);
+                                    setEditingItemName(item.nome);
+                                    setEditingItemCategory(item.categoria);
+                                  }}
+                                  className="border-slate-200"
+                                >
+                                  <Pencil className="mr-1 size-4" />
+                                  Editar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => onDeleteCatalogItem(item.id)}
+                                  className="border-rose-200 text-rose-600 hover:bg-rose-50"
+                                >
+                                  <Trash2 className="mr-1 size-4" />
+                                  Excluir
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>

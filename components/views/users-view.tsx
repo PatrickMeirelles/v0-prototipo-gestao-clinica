@@ -23,10 +23,12 @@ import { usePermissions, type ApiUser } from "@/hooks/use-permissions";
 import { useAuth } from "@/hooks/use-auth";
 
 export function UsersView() {
-  const [users, setUsers] = useState<ApiUser[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const { permissions, togglePermission } = usePermissions();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, hasPermission } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+
+  const canWriteUsers = hasPermission("users:write");
 
   useEffect(() => {
     async function loadUsers() {
@@ -34,18 +36,30 @@ export function UsersView() {
         const res = await fetch("/api/users");
         const payload = await res.json();
 
-        let fetchedUsers: ApiUser[] = [];
+        let rawUsers = [];
 
         if (payload && Array.isArray(payload.data)) {
-          fetchedUsers = payload.data;
+          rawUsers = payload.data;
         } else if (Array.isArray(payload)) {
-          fetchedUsers = payload;
+          rawUsers = payload;
         }
 
+        let fetchedUsers = rawUsers.map((u: any) => ({
+          ...u,
+          permissions: Array.isArray(u.permissions)
+            ? u.permissions.map((p: any) => p.permission_id || p)
+            : [],
+        }));
+
+        // Lógica de filtro atualizada:
         if (currentUser?.isMaster) {
+          // Se for Master, remove apenas a si mesmo da visualização
           fetchedUsers = fetchedUsers.filter(
-            (u) => u.email !== currentUser.email,
+            (u: any) => u.email !== currentUser.email,
           );
+        } else {
+          // Se não for Master, remove TODOS os usuários que são master da lista
+          fetchedUsers = fetchedUsers.filter((u: any) => !u.is_master);
         }
 
         setUsers(fetchedUsers);
@@ -65,6 +79,8 @@ export function UsersView() {
     userId: number,
     permissionId: number,
   ) => {
+    if (!canWriteUsers) return;
+
     const success = await togglePermission(userId, permissionId);
 
     if (success) {
@@ -79,7 +95,7 @@ export function UsersView() {
             return {
               ...user,
               permissions: hasAccess
-                ? currentPermissions.filter((id) => id !== permissionId)
+                ? currentPermissions.filter((id: number) => id !== permissionId)
                 : [...currentPermissions, permissionId],
             };
           }
@@ -127,7 +143,7 @@ export function UsersView() {
                 <TableRow className="border-slate-200 hover:bg-transparent">
                   <TableHead className="text-slate-600">Usuário</TableHead>
                   <TableHead className="text-slate-600">E-mail</TableHead>
-                  {/* <TableHead className="text-slate-600">Nível</TableHead> */}
+                  <TableHead className="text-slate-600">Nível</TableHead>
                   <TableHead className="text-slate-600">Permissões</TableHead>
                 </TableRow>
               </TableHeader>
@@ -141,6 +157,8 @@ export function UsersView() {
                       ? user.permissions
                       : [];
 
+                    const userNivel = user.is_master ? "Master" : "Operação";
+
                     return (
                       <TableRow key={user.id} className="border-slate-100">
                         <TableCell>
@@ -148,7 +166,7 @@ export function UsersView() {
                             <Avatar className="size-9">
                               <AvatarFallback
                                 className={
-                                  user.nivel === "Admin"
+                                  user.is_master
                                     ? "bg-teal-100 text-teal-700"
                                     : "bg-slate-100 text-slate-600"
                                 }
@@ -164,52 +182,82 @@ export function UsersView() {
                         <TableCell className="text-slate-600">
                           {user.email}
                         </TableCell>
-                        {/* <TableCell>
+                        <TableCell>
                           <Badge
                             variant="outline"
                             className={
-                              user.nivel === "Admin"
+                              user.is_master
                                 ? "border-teal-200 bg-teal-50 text-teal-700"
                                 : "border-slate-200 bg-slate-50 text-slate-600"
                             }
                           >
-                            {user.nivel}
+                            {userNivel}
                           </Badge>
-                        </TableCell> */}
+                        </TableCell>
                         <TableCell>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
-                            {permissions.map((permission) => {
-                              const hasAccess = userPermissions.includes(
-                                permission.id,
-                              );
+                          {user.is_master ? (
+                            <Badge className="bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-50">
+                              Acesso Total (Master)
+                            </Badge>
+                          ) : canWriteUsers ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
+                              {permissions.map((permission) => {
+                                const hasAccess = userPermissions.includes(
+                                  permission.id,
+                                );
 
-                              return (
-                                <div
-                                  key={permission.id}
-                                  className="flex items-start gap-3 min-w-[200px]"
-                                >
-                                  <Switch
-                                    checked={hasAccess}
-                                    onCheckedChange={() =>
-                                      handleTogglePermission(
-                                        user.id,
-                                        permission.id,
-                                      )
-                                    }
-                                    className="data-[state=checked]:bg-teal-600 mt-1 shrink-0"
-                                  />
-                                  <div className="flex flex-col">
-                                    <span className="text-sm font-medium text-slate-700">
-                                      {permission.name}
-                                    </span>
-                                    <span className="text-xs text-slate-400">
-                                      {permission.module}
-                                    </span>
+                                return (
+                                  <div
+                                    key={permission.id}
+                                    className="flex items-start gap-3 min-w-[200px]"
+                                  >
+                                    <Switch
+                                      checked={hasAccess}
+                                      onCheckedChange={() =>
+                                        handleTogglePermission(
+                                          user.id,
+                                          permission.id,
+                                        )
+                                      }
+                                      className="data-[state=checked]:bg-teal-600 mt-1 shrink-0"
+                                    />
+                                    <div className="flex flex-col">
+                                      <span className="text-sm font-medium text-slate-700">
+                                        {permission.name}
+                                      </span>
+                                      <span className="text-xs text-slate-400">
+                                        {permission.module}
+                                      </span>
+                                    </div>
                                   </div>
-                                </div>
-                              );
-                            })}
-                          </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <div className="flex flex-wrap gap-1.5 py-1 max-w-[450px]">
+                              {permissions.filter((permission) =>
+                                userPermissions.includes(permission.id),
+                              ).length > 0 ? (
+                                permissions
+                                  .filter((permission) =>
+                                    userPermissions.includes(permission.id),
+                                  )
+                                  .map((permission) => (
+                                    <Badge
+                                      key={permission.id}
+                                      variant="secondary"
+                                      className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-normal"
+                                    >
+                                      {permission.name}
+                                    </Badge>
+                                  ))
+                              ) : (
+                                <span className="text-xs text-slate-400 italic">
+                                  Nenhuma permissão atribuída
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     );
