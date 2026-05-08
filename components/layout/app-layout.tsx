@@ -15,12 +15,15 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import type { AuthUser } from "@/lib/auth";
 
 interface AppLayoutProps {
   children: React.ReactNode;
   currentView: ViewType;
   onNavigate: (view: ViewType) => void;
   onLogout: () => void;
+  currentUser: AuthUser | null;
+  canAccessView: (view: ViewType) => boolean;
 }
 
 const menuItems: { view: ViewType; label: string; icon: React.ReactNode }[] = [
@@ -65,8 +68,17 @@ export function AppLayout({
   currentView,
   onNavigate,
   onLogout,
+  currentUser,
+  canAccessView,
 }: AppLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const visibleMenuItems = menuItems.filter((item) => canAccessView(item.view));
+  const initials = currentUser?.name
+    ?.split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
 
   const handleNavigate = (view: ViewType) => {
     onNavigate(view);
@@ -86,7 +98,7 @@ export function AppLayout({
 
         <nav className="flex-1 p-4">
           <ul className="space-y-1">
-            {menuItems.map((item) => (
+            {visibleMenuItems.map((item) => (
               <li key={item.view}>
                 <Button
                   variant={currentView === item.view ? "secondary" : "ghost"}
@@ -149,7 +161,7 @@ export function AppLayout({
 
         <nav className="flex-1 p-4">
           <ul className="space-y-1">
-            {menuItems.map((item) => (
+            {visibleMenuItems.map((item) => (
               <li key={item.view}>
                 <Button
                   variant={currentView === item.view ? "secondary" : "ghost"}
@@ -200,12 +212,16 @@ export function AppLayout({
 
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
-              <p className="text-sm font-medium text-slate-900">Sara Raquel</p>
-              <p className="text-xs text-slate-500">Admin</p>
+              <p className="text-sm font-medium text-slate-900">
+                {currentUser?.name ?? "Usuário"}
+              </p>
+              <p className="text-xs text-slate-500">
+                {currentUser?.isMaster ? "Master" : "Usuário"}
+              </p>
             </div>
             <Avatar className="size-9">
               <AvatarFallback className="bg-teal-100 text-teal-700">
-                SR
+                {initials || "US"}
               </AvatarFallback>
             </Avatar>
           </div>

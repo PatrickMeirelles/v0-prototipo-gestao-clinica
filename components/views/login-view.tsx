@@ -8,16 +8,18 @@ import { Label } from "@/components/ui/label"
 import { Stethoscope, DollarSign } from "lucide-react"
 
 interface LoginViewProps {
-  onLogin: () => void
+  onLogin: (payload: { email: string; password: string }) => Promise<void>
+  isLoading?: boolean
+  error?: string | null
 }
 
-export function LoginView({ onLogin }: LoginViewProps) {
+export function LoginView({ onLogin, isLoading = false, error }: LoginViewProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onLogin()
+    await onLogin({ email, password })
   }
 
   return (
@@ -65,11 +67,15 @@ export function LoginView({ onLogin }: LoginViewProps) {
                 className="border-slate-200 focus:border-teal-500 focus:ring-teal-500"
               />
             </div>
+            {error ? (
+              <p className="text-sm font-medium text-rose-600">{error}</p>
+            ) : null}
             <Button 
               type="submit" 
+              disabled={isLoading}
               className="w-full bg-teal-600 text-white hover:bg-teal-700"
             >
-              Entrar
+              {isLoading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
         </CardContent>

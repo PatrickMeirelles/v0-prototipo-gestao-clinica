@@ -24,6 +24,21 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Backend e autenticação
+
+Crie um arquivo `.env.local` baseado em `.env.example`:
+
+```bash
+cp .env.example .env.local
+```
+
+As rotas internas do frontend já estão prontas para:
+
+- `POST /api/auth/login`: autentica no backend, extrai token Cognito e salva em cookie `httpOnly`.
+- `POST /api/auth/refresh`: renova token usando `sub` (username de `users/me`) + `refreshToken`.
+- `POST /api/auth/logout`: remove o cookie de sessão.
+- `GET /api/users/me`: usa o token da sessão e tenta refresh automático se receber `401/403`.
+
 ## Learn More
 
 To learn more, take a look at the following resources:

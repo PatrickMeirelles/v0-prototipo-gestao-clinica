@@ -1,25 +1,26 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { LoginView } from "@/components/views/login-view"
-import { DashboardView } from "@/components/views/dashboard-view"
-import { TransactionsView } from "@/components/views/transactions-view"
-import { UsersView } from "@/components/views/users-view"
-import { SettingsView } from "@/components/views/settings-view"
-import { CatalogView } from "@/components/views/catalog-view"
-import { AppLayout } from "@/components/layout/app-layout"
+import { useEffect, useMemo, useState } from "react";
+import { LoginView } from "@/components/views/login-view";
+import { DashboardView } from "@/components/views/dashboard-view";
+import { TransactionsView } from "@/components/views/transactions-view";
+import { UsersView } from "@/components/views/users-view";
+import { SettingsView } from "@/components/views/settings-view";
+import { CatalogView } from "@/components/views/catalog-view";
+import { AppLayout } from "@/components/layout/app-layout";
+import { useAuth } from "@/hooks/use-auth";
 
-export type ItemCategory = "medicacao" | "insumo" | "taxa_frete"
+export type ItemCategory = "medicacao" | "insumo" | "taxa_frete";
 
 export interface Supplier {
-  id: number
-  nome: string
+  id: number;
+  nome: string;
 }
 
 export interface CatalogItem {
-  id: number
-  nome: string
-  categoria: ItemCategory
+  id: number;
+  nome: string;
+  categoria: ItemCategory;
 }
 
 export type ViewType =
@@ -28,16 +29,26 @@ export type ViewType =
   | "transactions"
   | "catalog"
   | "users"
-  | "settings"
+  | "settings";
 
 export default function Home() {
-  const [currentView, setCurrentView] = useState<ViewType>("login")
+  const [currentView, setCurrentView] = useState<ViewType>("dashboard");
+  const [isSubmittingLogin, setIsSubmittingLogin] = useState(false);
+  const {
+    user,
+    isLoading,
+    isAuthenticated,
+    login,
+    logout,
+    hasPermission,
+    error,
+  } = useAuth();
   const [suppliers, setSuppliers] = useState<Supplier[]>([
     { id: 1, nome: "BIOS" },
     { id: 2, nome: "Formédica" },
     { id: 3, nome: "Flukka" },
     { id: 4, nome: "Essentia" },
-  ])
+  ]);
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([
     { id: 1, nome: "Gestrinona 85mg", categoria: "medicacao" },
     { id: 2, nome: "Testosterona 50mg", categoria: "medicacao" },
@@ -69,75 +80,147 @@ export default function Home() {
     },
     { id: 13, nome: "Taxa de entrega", categoria: "taxa_frete" },
     { id: 14, nome: "Frete", categoria: "taxa_frete" },
-  ])
+  ]);
 
   const addSupplier = (nome: string) => {
-    const trimmed = nome.trim()
-    if (!trimmed) return null
+    const trimmed = nome.trim();
+    if (!trimmed) return null;
 
     const existing = suppliers.find(
       (supplier) => supplier.nome.toLowerCase() === trimmed.toLowerCase(),
-    )
-    if (existing) return existing
+    );
+    if (existing) return existing;
 
-    const newSupplier = { id: Date.now(), nome: trimmed }
-    setSuppliers((prev) => [...prev, newSupplier])
-    return newSupplier
-  }
+    const newSupplier = { id: Date.now(), nome: trimmed };
+    setSuppliers((prev) => [...prev, newSupplier]);
+    return newSupplier;
+  };
 
   const updateSupplier = (id: number, nome: string) => {
-    const trimmed = nome.trim()
-    if (!trimmed) return
+    const trimmed = nome.trim();
+    if (!trimmed) return;
     setSuppliers((prev) =>
       prev.map((supplier) =>
         supplier.id === id ? { ...supplier, nome: trimmed } : supplier,
       ),
-    )
-  }
+    );
+  };
 
   const deleteSupplier = (id: number) => {
-    setSuppliers((prev) => prev.filter((supplier) => supplier.id !== id))
-  }
+    setSuppliers((prev) => prev.filter((supplier) => supplier.id !== id));
+  };
 
   const addCatalogItem = (nome: string, categoria: ItemCategory) => {
-    const trimmed = nome.trim()
-    if (!trimmed) return null
+    const trimmed = nome.trim();
+    if (!trimmed) return null;
 
     const existing = catalogItems.find(
       (item) => item.nome.toLowerCase() === trimmed.toLowerCase(),
-    )
-    if (existing) return existing
+    );
+    if (existing) return existing;
 
-    const newItem = { id: Date.now(), nome: trimmed, categoria }
-    setCatalogItems((prev) => [...prev, newItem])
-    return newItem
-  }
+    const newItem = { id: Date.now(), nome: trimmed, categoria };
+    setCatalogItems((prev) => [...prev, newItem]);
+    return newItem;
+  };
 
   const updateCatalogItem = (
     id: number,
     updates: { nome: string; categoria: ItemCategory },
   ) => {
-    const trimmed = updates.nome.trim()
-    if (!trimmed) return
+    const trimmed = updates.nome.trim();
+    if (!trimmed) return;
     setCatalogItems((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, nome: trimmed, categoria: updates.categoria } : item,
+        item.id === id
+          ? { ...item, nome: trimmed, categoria: updates.categoria }
+          : item,
       ),
-    )
-  }
+    );
+  };
 
   const deleteCatalogItem = (id: number) => {
-    setCatalogItems((prev) => prev.filter((item) => item.id !== id))
+    setCatalogItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const canAccessView = useMemo(
+    () => (view: ViewType) => {
+      if (view === "login") return true;
+      if (!isAuthenticated) return false;
+
+      return (
+        hasPermission("*") ||
+        hasPermission(view) ||
+        hasPermission(`${view}:view`) ||
+        hasPermission(`${view}:*`)
+      );
+    },
+    [hasPermission, isAuthenticated],
+  );
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    if (!canAccessView(currentView)) {
+      const viewsAllowed: ViewType[] = [
+        "dashboard",
+        "transactions",
+        "catalog",
+        "users",
+        "settings",
+      ];
+
+      const firstAllowedView = viewsAllowed.find((view) => canAccessView(view));
+
+      if (firstAllowedView) {
+        setCurrentView(firstAllowedView);
+      }
+    }
+  }, [canAccessView, currentView, isAuthenticated]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-600">
+        Carregando sessão...
+      </div>
+    );
   }
 
-  if (currentView === "login") {
-    return <LoginView onLogin={() => setCurrentView("dashboard")} />
+  if (!isAuthenticated) {
+    return (
+      <LoginView
+        error={error}
+        isLoading={isSubmittingLogin}
+        onLogin={async ({ email, password }) => {
+          setIsSubmittingLogin(true);
+          try {
+            await login({ email, password });
+            setCurrentView("dashboard");
+          } finally {
+            setIsSubmittingLogin(false);
+          }
+        }}
+      />
+    );
   }
 
   const renderView = () => {
+    if (!canAccessView(currentView)) {
+      return (
+        <div className="flex h-[50vh] flex-col items-center justify-center text-slate-500">
+          <h2 className="text-xl font-semibold text-slate-900">
+            Acesso Negado
+          </h2>
+          <p className="mt-2 text-sm">
+            Você não tem permissão para visualizar esta tela.
+          </p>
+        </div>
+      );
+    }
+
     switch (currentView) {
       case "dashboard":
-        return <DashboardView />
+        return <DashboardView />;
       case "transactions":
         return (
           <TransactionsView
@@ -146,7 +229,7 @@ export default function Home() {
             onAddSupplier={addSupplier}
             onAddCatalogItem={addCatalogItem}
           />
-        )
+        );
       case "catalog":
         return (
           <CatalogView
@@ -159,23 +242,27 @@ export default function Home() {
             onUpdateCatalogItem={updateCatalogItem}
             onDeleteCatalogItem={deleteCatalogItem}
           />
-        )
+        );
       case "users":
-        return <UsersView />
+        return <UsersView />;
       case "settings":
-        return <SettingsView />
+        return <SettingsView />;
       default:
-        return <DashboardView />
+        return null;
     }
-  }
+  };
 
   return (
-    <AppLayout 
-      currentView={currentView} 
+    <AppLayout
+      currentView={currentView}
       onNavigate={setCurrentView}
-      onLogout={() => setCurrentView("login")}
+      onLogout={async () => {
+        await logout();
+      }}
+      currentUser={user}
+      canAccessView={canAccessView}
     >
       {renderView()}
     </AppLayout>
-  )
+  );
 }
