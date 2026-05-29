@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -32,6 +33,9 @@ import {
   FileText,
   Filter,
   PackageX,
+  Search,
+  Users,
+  Ticket,
 } from "lucide-react";
 import {
   BarChart,
@@ -41,14 +45,11 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
   Cell,
-  Legend,
 } from "recharts";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// ========== MOCK DATA: Array de transações realistas ==========
+// ========== MOCK DATA: Transações e Atendimentos ==========
 interface Transaction {
   id: number;
   data: string;
@@ -63,6 +64,15 @@ interface Transaction {
   }[];
   valorTotal: number;
   notaFiscal: string;
+}
+
+interface Atendimento {
+  id: number;
+  data: string;
+  mes: string;
+  ano: string;
+  paciente: string;
+  valor: number;
 }
 
 const mockTransactions: Transaction[] = [
@@ -132,41 +142,6 @@ const mockTransactions: Transaction[] = [
     valorTotal: 5050,
     notaFiscal: "NF-2026-043",
   },
-  {
-    id: 4,
-    data: "15/04/2026",
-    mes: "04",
-    ano: "2026",
-    fornecedor: "Essentia",
-    itens: [
-      {
-        descricao: "Tirzepatida 40mg",
-        tipo: "medicacao",
-        quantidade: 5,
-        valorUnitario: 850,
-      },
-    ],
-    valorTotal: 4250,
-    notaFiscal: "NF-2026-044",
-  },
-  {
-    id: 5,
-    data: "10/04/2026",
-    mes: "04",
-    ano: "2026",
-    fornecedor: "Formédica",
-    itens: [
-      {
-        descricao: "hcg 5.000 ui",
-        tipo: "medicacao",
-        quantidade: 50,
-        valorUnitario: 180,
-      },
-      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 320 },
-    ],
-    valorTotal: 9320,
-    notaFiscal: "NF-2026-045",
-  },
   // MARÇO 2026
   {
     id: 6,
@@ -203,41 +178,6 @@ const mockTransactions: Transaction[] = [
     valorTotal: 6400,
     notaFiscal: "NF-2026-032",
   },
-  {
-    id: 8,
-    data: "15/03/2026",
-    mes: "03",
-    ano: "2026",
-    fornecedor: "Essentia",
-    itens: [
-      {
-        descricao: "hcg 5.000 ui",
-        tipo: "medicacao",
-        quantidade: 30,
-        valorUnitario: 180,
-      },
-      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 250 },
-    ],
-    valorTotal: 5650,
-    notaFiscal: "NF-2026-033",
-  },
-  {
-    id: 9,
-    data: "08/03/2026",
-    mes: "03",
-    ano: "2026",
-    fornecedor: "Flukka",
-    itens: [
-      {
-        descricao: "Tirzepatida 40mg",
-        tipo: "medicacao",
-        quantidade: 3,
-        valorUnitario: 850,
-      },
-    ],
-    valorTotal: 2550,
-    notaFiscal: "NF-2026-034",
-  },
   // FEVEREIRO 2026
   {
     id: 10,
@@ -258,62 +198,9 @@ const mockTransactions: Transaction[] = [
         quantidade: 8,
         valorUnitario: 320,
       },
-      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 280 },
     ],
-    valorTotal: 11340,
+    valorTotal: 11060,
     notaFiscal: "NF-2026-021",
-  },
-  {
-    id: 11,
-    data: "20/02/2026",
-    mes: "02",
-    ano: "2026",
-    fornecedor: "BIOS",
-    itens: [
-      {
-        descricao: "hcg 5.000 ui",
-        tipo: "medicacao",
-        quantidade: 40,
-        valorUnitario: 180,
-      },
-    ],
-    valorTotal: 7200,
-    notaFiscal: "NF-2026-022",
-  },
-  {
-    id: 12,
-    data: "14/02/2026",
-    mes: "02",
-    ano: "2026",
-    fornecedor: "Essentia",
-    itens: [
-      {
-        descricao: "Gestrinona 85mg",
-        tipo: "medicacao",
-        quantidade: 6,
-        valorUnitario: 320,
-      },
-      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 150 },
-    ],
-    valorTotal: 2070,
-    notaFiscal: "NF-2026-023",
-  },
-  {
-    id: 13,
-    data: "05/02/2026",
-    mes: "02",
-    ano: "2026",
-    fornecedor: "Flukka",
-    itens: [
-      {
-        descricao: "Tirzepatida 40mg",
-        tipo: "medicacao",
-        quantidade: 2,
-        valorUnitario: 850,
-      },
-    ],
-    valorTotal: 1700,
-    notaFiscal: "NF-2026-024",
   },
   // JANEIRO 2026
   {
@@ -329,72 +216,121 @@ const mockTransactions: Transaction[] = [
         quantidade: 6,
         valorUnitario: 850,
       },
-      {
-        descricao: "hcg 5.000 ui",
-        tipo: "medicacao",
-        quantidade: 25,
-        valorUnitario: 180,
-      },
-      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 200 },
     ],
-    valorTotal: 9800,
+    valorTotal: 5100,
     notaFiscal: "NF-2026-011",
   },
+];
+
+const mockAtendimentos: Atendimento[] = [
   {
-    id: 15,
-    data: "22/01/2026",
-    mes: "01",
+    id: 1,
+    data: "05/04/2026",
+    mes: "04",
     ano: "2026",
-    fornecedor: "Formédica",
-    itens: [
-      {
-        descricao: "Gestrinona 85mg",
-        tipo: "medicacao",
-        quantidade: 12,
-        valorUnitario: 320,
-      },
-    ],
-    valorTotal: 3840,
-    notaFiscal: "NF-2026-012",
+    paciente: "Ana Paula",
+    valor: 500,
   },
   {
-    id: 16,
-    data: "15/01/2026",
-    mes: "01",
+    id: 2,
+    data: "10/04/2026",
+    mes: "04",
     ano: "2026",
-    fornecedor: "Essentia",
-    itens: [
-      {
-        descricao: "Tirzepatida 40mg",
-        tipo: "medicacao",
-        quantidade: 4,
-        valorUnitario: 850,
-      },
-      { descricao: "Frete", tipo: "frete", quantidade: 1, valorUnitario: 180 },
-    ],
-    valorTotal: 3580,
-    notaFiscal: "NF-2026-013",
+    paciente: "Carlos Eduardo",
+    valor: 450,
   },
   {
-    id: 17,
-    data: "08/01/2026",
+    id: 3,
+    data: "15/04/2026",
+    mes: "04",
+    ano: "2026",
+    paciente: "Ana Paula",
+    valor: 300,
+  },
+  {
+    id: 4,
+    data: "20/04/2026",
+    mes: "04",
+    ano: "2026",
+    paciente: "Fernanda Costa",
+    valor: 600,
+  },
+  {
+    id: 5,
+    data: "02/03/2026",
+    mes: "03",
+    ano: "2026",
+    paciente: "Roberto Alves",
+    valor: 400,
+  },
+  {
+    id: 6,
+    data: "12/03/2026",
+    mes: "03",
+    ano: "2026",
+    paciente: "Ana Paula",
+    valor: 500,
+  },
+  {
+    id: 7,
+    data: "25/03/2026",
+    mes: "03",
+    ano: "2026",
+    paciente: "Julia Santos",
+    valor: 450,
+  },
+  {
+    id: 8,
+    data: "10/02/2026",
+    mes: "02",
+    ano: "2026",
+    paciente: "Carlos Eduardo",
+    valor: 450,
+  },
+  {
+    id: 9,
+    data: "18/02/2026",
+    mes: "02",
+    ano: "2026",
+    paciente: "Marcos Lima",
+    valor: 350,
+  },
+  {
+    id: 10,
+    data: "05/01/2026",
     mes: "01",
     ano: "2026",
-    fornecedor: "Flukka",
-    itens: [
-      {
-        descricao: "hcg 5.000 ui",
-        tipo: "medicacao",
-        quantidade: 15,
-        valorUnitario: 180,
-      },
-    ],
-    valorTotal: 2700,
-    notaFiscal: "NF-2026-014",
+    paciente: "Fernanda Costa",
+    valor: 600,
+  },
+  {
+    id: 11,
+    data: "20/01/2026",
+    mes: "01",
+    ano: "2026",
+    paciente: "Ana Paula",
+    valor: 500,
+  },
+  {
+    id: 12,
+    data: "15/05/2026",
+    mes: "05",
+    ano: "2026",
+    paciente: "Julia Santos",
+    valor: 450,
+  },
+  {
+    id: 13,
+    data: "22/05/2026",
+    mes: "05",
+    ano: "2026",
+    paciente: "Ana Paula",
+    valor: 500,
   },
 ];
 
 const meses = [
+  { value: "todos", label: "Ano Todo" },
   { value: "01", label: "Janeiro" },
   { value: "02", label: "Fevereiro" },
   { value: "03", label: "Março" },
@@ -421,117 +357,139 @@ const formatCurrency = (value: number) => {
 export function DashboardView() {
   const isMobile = useIsMobile();
 
-  // Estados para seleção temporária
-  const [mesSelecionado, setMesSelecionado] = useState("04");
-  const [anoSelecionado, setAnoSelecionado] = useState("2026");
+  const currentYear = new Date().getFullYear().toString();
+  const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, "0");
 
-  // Estado para o filtro aplicado (só atualiza ao clicar no botão)
+  // Estados para seleção temporária
+  const [mesSelecionado, setMesSelecionado] = useState(currentMonth);
+  const [anoSelecionado, setAnoSelecionado] = useState(currentYear);
+  const [tableSearch, setTableSearch] = useState("");
+
+  // Estado para o filtro aplicado
   const [appliedFilter, setAppliedFilter] = useState({
-    mes: "04",
-    ano: "2026",
+    mes: currentMonth,
+    ano: currentYear,
   });
 
-  const mesNome =
-    meses.find((m) => m.value === appliedFilter.mes)?.label || "Abril";
+  const mesNome = meses.find((m) => m.value === appliedFilter.mes)?.label;
+  const labelPeriodo =
+    appliedFilter.mes === "todos"
+      ? appliedFilter.ano
+      : `${mesNome}/${appliedFilter.ano}`;
 
-  // Filtra transações com base no filtro aplicado
+  // ================= FILTROS DE DADOS ================= //
   const filteredTransactions = useMemo(() => {
-    return mockTransactions.filter(
-      (t) => t.mes === appliedFilter.mes && t.ano === appliedFilter.ano,
-    );
+    return mockTransactions.filter((t) => {
+      const matchAno = t.ano === appliedFilter.ano;
+      const matchMes =
+        appliedFilter.mes === "todos" ? true : t.mes === appliedFilter.mes;
+      return matchAno && matchMes;
+    });
   }, [appliedFilter]);
 
-  // Cálculo do gasto total
+  const filteredAtendimentos = useMemo(() => {
+    return mockAtendimentos.filter((a) => {
+      const matchAno = a.ano === appliedFilter.ano;
+      const matchMes =
+        appliedFilter.mes === "todos" ? true : a.mes === appliedFilter.mes;
+      return matchAno && matchMes;
+    });
+  }, [appliedFilter]);
+
+  // ================= CÁLCULOS DESPESAS ================= //
   const gastoTotal = useMemo(() => {
-    return filteredTransactions.reduce(
-      (acc: any, t: { valorTotal: any }) => acc + t.valorTotal,
-      0,
-    );
+    return filteredTransactions.reduce((acc, t) => acc + t.valorTotal, 0);
   }, [filteredTransactions]);
 
-  // Cálculo do maior fornecedor
   const maiorFornecedor = useMemo(() => {
     if (filteredTransactions.length === 0) return { nome: "-", percentual: 0 };
-
     const gastosPorFornecedor: Record<string, number> = {};
-    filteredTransactions.forEach(
-      (t: { fornecedor: string | number; valorTotal: number }) => {
-        gastosPorFornecedor[t.fornecedor] =
-          (gastosPorFornecedor[t.fornecedor] || 0) + t.valorTotal;
-      },
-    );
-
+    filteredTransactions.forEach((t) => {
+      gastosPorFornecedor[t.fornecedor] =
+        (gastosPorFornecedor[t.fornecedor] || 0) + t.valorTotal;
+    });
     let maior = { nome: "", valor: 0 };
     Object.entries(gastosPorFornecedor).forEach(([nome, valor]) => {
-      if (valor > maior.valor) {
-        maior = { nome, valor };
-      }
+      if (valor > maior.valor) maior = { nome, valor };
     });
-
     const percentual =
       gastoTotal > 0 ? Math.round((maior.valor / gastoTotal) * 100) : 0;
     return { nome: maior.nome, percentual };
   }, [filteredTransactions, gastoTotal]);
 
-  // Cálculo da variação em relação ao mês anterior
   const variacao = useMemo(() => {
-    const mesAnterior =
-      appliedFilter.mes === "01"
-        ? "12"
-        : String(parseInt(appliedFilter.mes) - 1).padStart(2, "0");
-    const anoAnterior =
-      appliedFilter.mes === "01"
-        ? String(parseInt(appliedFilter.ano) - 1)
-        : appliedFilter.ano;
-
-    const transacoesAnterior = mockTransactions.filter(
-      (t) => t.mes === mesAnterior && t.ano === anoAnterior,
-    );
-    const gastoAnterior = transacoesAnterior.reduce(
-      (acc, t) => acc + t.valorTotal,
-      0,
-    );
-
+    let gastoAnterior = 0;
+    if (appliedFilter.mes === "todos") {
+      const anoAnterior = String(parseInt(appliedFilter.ano) - 1);
+      const transacoesAnterior = mockTransactions.filter(
+        (t) => t.ano === anoAnterior,
+      );
+      gastoAnterior = transacoesAnterior.reduce(
+        (acc, t) => acc + t.valorTotal,
+        0,
+      );
+    } else {
+      const mesAnterior =
+        appliedFilter.mes === "01"
+          ? "12"
+          : String(parseInt(appliedFilter.mes) - 1).padStart(2, "0");
+      const anoAnterior =
+        appliedFilter.mes === "01"
+          ? String(parseInt(appliedFilter.ano) - 1)
+          : appliedFilter.ano;
+      const transacoesAnterior = mockTransactions.filter(
+        (t) => t.mes === mesAnterior && t.ano === anoAnterior,
+      );
+      gastoAnterior = transacoesAnterior.reduce(
+        (acc, t) => acc + t.valorTotal,
+        0,
+      );
+    }
     if (gastoAnterior === 0) return 0;
     return Math.round(((gastoTotal - gastoAnterior) / gastoAnterior) * 100);
   }, [appliedFilter, gastoTotal]);
 
-  // Dados para o gráfico de pizza (medicações vs fretes)
+  // ================= CÁLCULOS ATENDIMENTOS (NOVOS) ================= //
+  const topPaciente = useMemo(() => {
+    if (filteredAtendimentos.length === 0) return { nome: "-", count: 0 };
+    const contagem: Record<string, number> = {};
+    filteredAtendimentos.forEach((a) => {
+      contagem[a.paciente] = (contagem[a.paciente] || 0) + 1;
+    });
+    let top = { nome: "-", count: 0 };
+    Object.entries(contagem).forEach(([nome, count]) => {
+      if (count > top.count) top = { nome, count };
+    });
+    return top;
+  }, [filteredAtendimentos]);
+
+  const ticketMedio = useMemo(() => {
+    if (filteredAtendimentos.length === 0) return 0;
+    const totalReceita = filteredAtendimentos.reduce(
+      (acc, a) => acc + a.valor,
+      0,
+    );
+    return totalReceita / filteredAtendimentos.length;
+  }, [filteredAtendimentos]);
+
+  // ================= DADOS GRÁFICOS ================= //
   const categoryData = useMemo(() => {
     let totalMedicacao = 0;
     let totalFrete = 0;
-
-    filteredTransactions.forEach((t: { itens: any[] }) => {
-      t.itens.forEach(
-        (item: { quantidade: number; valorUnitario: number; tipo: string }) => {
-          const valorItem = item.quantidade * item.valorUnitario;
-          if (item.tipo === "medicacao") {
-            totalMedicacao += valorItem;
-          } else {
-            totalFrete += valorItem;
-          }
-        },
-      );
+    filteredTransactions.forEach((t) => {
+      t.itens.forEach((item) => {
+        const valorItem = item.quantidade * item.valorUnitario;
+        if (item.tipo === "medicacao") totalMedicacao += valorItem;
+        else totalFrete += valorItem;
+      });
     });
-
-    const total = totalMedicacao + totalFrete;
-    if (total === 0) return [];
-
-    return [
-      {
-        name: "Medicações",
-        value: Math.round((totalMedicacao / total) * 100),
-        color: "#0d9488",
-      },
-      {
-        name: "Fretes",
-        value: Math.round((totalFrete / total) * 100),
-        color: "#f97316",
-      },
+    const data = [
+      { name: "Medicações", valor: totalMedicacao, color: "#0d9488" },
+      { name: "Fretes", valor: totalFrete, color: "#f97316" },
     ];
+    return data.filter((d) => d.valor > 0);
   }, [filteredTransactions]);
 
-  // Dados para o gráfico de barras (últimos 6 meses)
   const monthlyData = useMemo(() => {
     const data: { month: string; valor: number }[] = [];
     const nomesAbreviados = [
@@ -549,31 +507,85 @@ export function DashboardView() {
       "Dez",
     ];
 
-    for (let i = 5; i >= 0; i--) {
-      let mesNum = parseInt(appliedFilter.mes) - i;
-      let anoNum = parseInt(appliedFilter.ano);
-
-      while (mesNum <= 0) {
-        mesNum += 12;
-        anoNum -= 1;
+    if (appliedFilter.mes === "todos") {
+      for (let i = 1; i <= 12; i++) {
+        const mesStr = String(i).padStart(2, "0");
+        const valorMes = filteredTransactions
+          .filter((t) => t.mes === mesStr)
+          .reduce((acc, t) => acc + t.valorTotal, 0);
+        if (valorMes > 0)
+          data.push({ month: nomesAbreviados[i - 1], valor: valorMes });
       }
+    } else {
+      for (let i = 5; i >= 0; i--) {
+        let mesNum = parseInt(appliedFilter.mes) - i;
+        let anoNum = parseInt(appliedFilter.ano);
+        while (mesNum <= 0) {
+          mesNum += 12;
+          anoNum -= 1;
+        }
+        const mesStr = String(mesNum).padStart(2, "0");
+        const anoStr = String(anoNum);
+        const valorMes = mockTransactions
+          .filter((t) => t.mes === mesStr && t.ano === anoStr)
+          .reduce((acc, t) => acc + t.valorTotal, 0);
 
-      const mesStr = String(mesNum).padStart(2, "0");
-      const anoStr = String(anoNum);
+        if (valorMes > 0 || i === 0) {
+          data.push({ month: nomesAbreviados[mesNum - 1], valor: valorMes });
+        }
+      }
+    }
+    return data;
+  }, [appliedFilter, filteredTransactions]);
 
-      const transacoesMes = mockTransactions.filter(
-        (t) => t.mes === mesStr && t.ano === anoStr,
-      );
-      const valorMes = transacoesMes.reduce((acc, t) => acc + t.valorTotal, 0);
+  const atendimentosAnoData = useMemo(() => {
+    const data: { month: string; atendimentos: number }[] = [];
+    const nomesAbreviados = [
+      "Jan",
+      "Fev",
+      "Mar",
+      "Abr",
+      "Mai",
+      "Jun",
+      "Jul",
+      "Ago",
+      "Set",
+      "Out",
+      "Nov",
+      "Dez",
+    ];
+
+    // Este gráfico sempre mostra o ano todo, independente do mês filtrado
+    for (let i = 1; i <= 12; i++) {
+      const mesStr = String(i).padStart(2, "0");
+      const atendimentosMes = mockAtendimentos.filter(
+        (a) => a.ano === appliedFilter.ano && a.mes === mesStr,
+      ).length;
 
       data.push({
-        month: nomesAbreviados[mesNum - 1],
-        valor: valorMes,
+        month: nomesAbreviados[i - 1],
+        atendimentos: atendimentosMes,
       });
     }
-
     return data;
-  }, [appliedFilter]);
+  }, [appliedFilter.ano]);
+
+  // ================= TABELA ================= //
+  const tableTransactions = useMemo(() => {
+    if (!tableSearch) return filteredTransactions;
+    const lower = tableSearch.toLowerCase();
+    return filteredTransactions.filter((t) => {
+      return (
+        t.fornecedor.toLowerCase().includes(lower) ||
+        t.valorTotal.toString().includes(lower) ||
+        t.itens.some(
+          (item) =>
+            item.descricao.toLowerCase().includes(lower) ||
+            item.tipo.toLowerCase().includes(lower),
+        )
+      );
+    });
+  }, [filteredTransactions, tableSearch]);
 
   const handleFiltrar = () => {
     setAppliedFilter({ mes: mesSelecionado, ano: anoSelecionado });
@@ -582,7 +594,7 @@ export function DashboardView() {
   const hasData = filteredTransactions.length > 0;
 
   return (
-    <div className="min-w-0 space-y-6">
+    <div className="min-w-0 space-y-6 pb-12">
       {/* Barra de Filtros */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-xl font-semibold text-slate-900">Visão Geral</h2>
@@ -626,7 +638,7 @@ export function DashboardView() {
         </div>
       </div>
 
-      {/* Cards Superiores */}
+      {/* Cards Superiores (Despesas) */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card className="border-slate-200 bg-white">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -648,11 +660,11 @@ export function DashboardView() {
                 className={`text-xs ${variacao >= 0 ? "text-emerald-600" : "text-rose-600"}`}
               >
                 {variacao >= 0 ? "+" : ""}
-                {variacao}% em relação ao mês anterior
+                {variacao}% em relação ao período anterior
               </p>
             )}
             <p className="mt-1 text-xs text-muted-foreground">
-              Referente a {mesNome}/{appliedFilter.ano}
+              Referente a {labelPeriodo}
             </p>
           </CardContent>
         </Card>
@@ -674,7 +686,7 @@ export function DashboardView() {
               </p>
             )}
             <p className="mt-1 text-xs text-muted-foreground">
-              Referente a {mesNome}/{appliedFilter.ano}
+              Referente a {labelPeriodo}
             </p>
           </CardContent>
         </Card>
@@ -692,109 +704,137 @@ export function DashboardView() {
             </div>
             <p className="text-xs text-slate-500">Lançamentos registrados</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Referente a {mesNome}/{appliedFilter.ano}
+              Referente a {labelPeriodo}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Gráficos */}
+      {/* Gráficos de Despesas */}
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Gráfico de Barras */}
         <Card className="border-slate-200 bg-white">
           <CardHeader>
             <CardTitle className="text-base font-semibold text-slate-900">
               Histórico de Despesas
             </CardTitle>
             <CardDescription className="text-slate-500">
-              Últimos 6 meses (até {mesNome}/{appliedFilter.ano})
+              {appliedFilter.mes === "todos"
+                ? `Meses com lançamento em ${appliedFilter.ano}`
+                : `Últimos meses (até ${labelPeriodo})`}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className={isMobile ? "h-64" : "h-[300px]"}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis
-                    dataKey="month"
-                    stroke="#64748b"
-                    fontSize={12}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    stroke="#64748b"
-                    fontSize={12}
-                    tickLine={false}
-                    tickFormatter={(value: number) =>
-                      `${(value / 1000).toFixed(0)}k`
-                    }
-                  />
-                  <Tooltip
-                    formatter={(value: number) => [
-                      formatCurrency(value),
-                      "Valor",
-                    ]}
-                    contentStyle={{
-                      backgroundColor: "#fff",
-                      border: "1px solid #e2e8f0",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Bar dataKey="valor" fill="#0d9488" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Gráfico de Pizza */}
-        <Card className="border-slate-200 bg-white">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold text-slate-900">
-              Divisão por Categoria
-            </CardTitle>
-            <CardDescription className="text-slate-500">
-              Medicações vs Fretes em {mesNome}/{appliedFilter.ano}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className={isMobile ? "h-64" : "h-[300px]"}>
-              {categoryData.length > 0 ? (
+              {monthlyData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={isMobile ? 40 : 60}
-                      outerRadius={isMobile ? 72 : 100}
-                      paddingAngle={5}
-                      dataKey="value"
-                      label={
-                        isMobile ? undefined : ({ name, value }) => `${name}: ${value}%`
-                      }
-                      labelLine={false}
-                    >
-                      {categoryData.map((entry: { color: any }, index: any) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
+                  <BarChart data={monthlyData}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="#e2e8f0"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="month"
+                      stroke="#64748b"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      stroke="#64748b"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                    />
                     <Tooltip
-                      formatter={(value: number) => [`${value}%`, "Percentual"]}
+                      formatter={(value: number) => [
+                        formatCurrency(value),
+                        "Valor",
+                      ]}
+                      cursor={{ fill: "transparent" }}
                       contentStyle={{
                         backgroundColor: "#fff",
                         border: "1px solid #e2e8f0",
                         borderRadius: "8px",
                       }}
                     />
-                    <Legend
-                      verticalAlign="bottom"
-                      height={isMobile ? 24 : 36}
-                      formatter={(value: any) => (
-                        <span className="text-slate-600">{value}</span>
-                      )}
+                    <Bar
+                      dataKey="valor"
+                      fill="#0d9488"
+                      radius={[4, 4, 0, 0]}
+                      barSize={40}
                     />
-                  </PieChart>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-full flex-col items-center justify-center text-slate-400">
+                  <PackageX className="mb-2 size-12" />
+                  <p className="text-sm">Sem dados para este período</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 bg-white">
+          <CardHeader>
+            <CardTitle className="text-base font-semibold text-slate-900">
+              Gasto por Categoria
+            </CardTitle>
+            <CardDescription className="text-slate-500">
+              Medicações vs Fretes em {labelPeriodo}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className={isMobile ? "h-64" : "h-[300px]"}>
+              {categoryData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={categoryData}
+                    layout="vertical"
+                    margin={{ top: 10, right: 30, left: 40, bottom: 0 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="#e2e8f0"
+                      horizontal={false}
+                    />
+                    <XAxis
+                      type="number"
+                      stroke="#64748b"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                    />
+                    <YAxis
+                      dataKey="name"
+                      type="category"
+                      stroke="#64748b"
+                      fontSize={13}
+                      tickLine={false}
+                      axisLine={false}
+                      width={80}
+                    />
+                    <Tooltip
+                      formatter={(value: number) => [
+                        formatCurrency(value),
+                        "Valor Gasto",
+                      ]}
+                      cursor={{ fill: "transparent" }}
+                      contentStyle={{
+                        backgroundColor: "#fff",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Bar dataKey="valor" radius={[0, 4, 4, 0]} barSize={35}>
+                      {categoryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="flex h-full flex-col items-center justify-center text-slate-400">
@@ -807,15 +847,133 @@ export function DashboardView() {
         </Card>
       </div>
 
-      {/* Tabela de Transações Recentes */}
+      {/* Cards Novos (Atendimentos e Pacientes) */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="border-slate-200 bg-white">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-slate-600">
+              Paciente Mais Atendido
+            </CardTitle>
+            <Users className="size-4 text-indigo-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-900">
+              {filteredAtendimentos.length > 0 ? topPaciente.nome : "-"}
+            </div>
+            {filteredAtendimentos.length > 0 && (
+              <p className="text-xs text-slate-500">
+                {topPaciente.count}{" "}
+                {topPaciente.count === 1 ? "atendimento" : "atendimentos"}{" "}
+                registrados
+              </p>
+            )}
+            <p className="mt-1 text-xs text-muted-foreground">
+              Referente a {labelPeriodo}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 bg-white">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-slate-600">
+              Ticket Médio da Clínica
+            </CardTitle>
+            <Ticket className="size-4 text-emerald-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-900">
+              {filteredAtendimentos.length > 0
+                ? formatCurrency(ticketMedio)
+                : "R$ 0,00"}
+            </div>
+            {filteredAtendimentos.length > 0 && (
+              <p className="text-xs text-slate-500">
+                Média por atendimento realizado
+              </p>
+            )}
+            <p className="mt-1 text-xs text-muted-foreground">
+              Referente a {labelPeriodo}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Novo Gráfico: Atendimentos ao longo do ano */}
       <Card className="border-slate-200 bg-white">
         <CardHeader>
           <CardTitle className="text-base font-semibold text-slate-900">
-            Transações Recentes
+            Atendimentos ao Longo do Ano
           </CardTitle>
           <CardDescription className="text-slate-500">
-            Lançamentos de {mesNome}/{appliedFilter.ano}
+            Quantidade de pacientes atendidos por mês em {appliedFilter.ano}
           </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className={isMobile ? "h-64" : "h-[300px]"}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={atendimentosAnoData}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#e2e8f0"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="month"
+                  stroke="#64748b"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  stroke="#64748b"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip
+                  formatter={(value: number) => [value, "Atendimentos"]}
+                  cursor={{ fill: "transparent" }}
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "8px",
+                  }}
+                />
+                <Bar
+                  dataKey="atendimentos"
+                  fill="#0d9488"
+                  radius={[4, 4, 0, 0]}
+                  barSize={35}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tabela de Transações Recentes */}
+      <Card className="border-slate-200 bg-white">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+          <div>
+            <CardTitle className="text-base font-semibold text-slate-900">
+              Transações Recentes
+            </CardTitle>
+            <CardDescription className="text-slate-500">
+              Lançamentos de {labelPeriodo}
+            </CardDescription>
+          </div>
+
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-2.5 top-2.5 size-4 text-slate-400" />
+            <Input
+              type="text"
+              placeholder="Buscar por categoria, fornecedor ou valor..."
+              className="w-full pl-9 bg-slate-50"
+              value={tableSearch}
+              onChange={(e) => setTableSearch(e.target.value)}
+            />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="w-full overflow-x-auto">
@@ -831,48 +989,35 @@ export function DashboardView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTransactions.length > 0 ? (
-                  filteredTransactions
-                    .slice(0, 5)
-                    .map(
-                      (transaction: {
-                        id: any;
-                        data: any;
-                        fornecedor: any;
-                        itens: string | any[];
-                        valorTotal: number;
-                      }) => (
-                        <TableRow
-                          key={transaction.id}
-                          className="border-slate-100"
+                {tableTransactions.length > 0 ? (
+                  tableTransactions.slice(0, 15).map((transaction) => (
+                    <TableRow key={transaction.id} className="border-slate-100">
+                      <TableCell className="text-slate-900">
+                        {transaction.data}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className="border-slate-200 bg-slate-50 text-slate-700"
                         >
-                          <TableCell className="text-slate-900">
-                            {transaction.data}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className="border-slate-200 bg-slate-50 text-slate-700"
-                            >
-                              {transaction.fornecedor}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-slate-600">
-                            {transaction.itens.length}
-                          </TableCell>
-                          <TableCell className="text-right font-medium text-emerald-600">
-                            {formatCurrency(transaction.valorTotal)}
-                          </TableCell>
-                        </TableRow>
-                      ),
-                    )
+                          {transaction.fornecedor}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-slate-600">
+                        {transaction.itens.length}
+                      </TableCell>
+                      <TableCell className="text-right font-medium text-emerald-600">
+                        {formatCurrency(transaction.valorTotal)}
+                      </TableCell>
+                    </TableRow>
+                  ))
                 ) : (
                   <TableRow>
                     <TableCell colSpan={4} className="h-24 text-center">
                       <div className="flex flex-col items-center justify-center text-slate-400">
                         <PackageX className="mb-2 size-8" />
                         <p className="text-sm">
-                          Nenhum lançamento encontrado para este período
+                          Nenhum lançamento encontrado para esta busca
                         </p>
                       </div>
                     </TableCell>
